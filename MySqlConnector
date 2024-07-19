@@ -1,0 +1,43 @@
+public class SqlConnector
+    {
+       
+        public MySqlConnection conn = new MySqlConnection("server=localhost;user id=root;password=root;database=db_users");
+
+        public DataTable GetUser(string userName)
+        {
+            try
+            {
+                string mySelectQuery = @"SELECT * FROM tbl_users WHERE username = @userName";
+
+                using (MySqlCommand cmd = new MySqlCommand(mySelectQuery, this.conn))
+                {
+                    cmd.Parameters.Add(new MySqlParameter("@userName", MySqlDbType.VarChar)).Value = userName;
+                    //add other parameters
+                    MySqlDataAdapter da = new MySqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt); // Hata burada oluşuyordu
+                    return dt;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+                throw new Exception("Veritabanı işlemi sırasında bir hata oluştu.", ex);
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+            }
+        }
+    }
+
+// ---------------------------------------------------
+
+SqlConnector sqlConnector = new SqlConnector();
+DataTable dt = sqlConnector.GetUser(username);
